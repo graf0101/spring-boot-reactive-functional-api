@@ -6,7 +6,7 @@
 		<groupId>org.springdoc</groupId>
 		<version>3.1.6-SNAPSHOT</version>
 	</parent>
-	<artifactId>springdoc-openapi-spring-boot-2-webflux-functional</artifactId>
+	<artifactId>spring-boot-reactive-functional-api</artifactId>
 
 	<dependencies>
 		<!-- springdoc ui -->
