@@ -28,15 +28,15 @@ public class WeatherHandler {
     public Mono<ServerResponse> getWeatherByName(ServerRequest request) {
         String locationName = (request.pathVariable("locationName"));
         Mono<Weather> weather = weatherRepository.getWeatherByName(locationName);
-        return weather
-                .flatMap(w -> ServerResponse.ok()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(fromValue(w)))
-                .switchIfEmpty(notFound);
+        return setContent(weather);
     }
 
     public Mono<ServerResponse> getWeatherByCoodinates(String locationLat, String locationLon) {
         Mono<Weather> weather = weatherRepository.getWeatherByCoodinates(locationLat, locationLon);
+        return setContent(weather);
+    }
+
+    private Mono<ServerResponse> setContent(Mono<Weather> weather) {
         return weather
                 .flatMap(w -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)

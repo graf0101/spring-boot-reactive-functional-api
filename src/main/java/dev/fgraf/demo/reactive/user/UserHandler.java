@@ -1,14 +1,14 @@
 package dev.fgraf.demo.reactive.user;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import org.springframework.web.reactive.function.BodyInserter;
-import static org.springframework.web.reactive.function.BodyInserters.fromValue;;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Component
 public class UserHandler {
@@ -28,6 +28,7 @@ public class UserHandler {
 
         // build response
         return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(customers, User.class);
+
     }
 
     /**
@@ -37,19 +38,19 @@ public class UserHandler {
         // parse path-variable
         long customerId = Long.valueOf(request.pathVariable("id"));
 
-        // build notFound response 
+        // build notFound response
         Mono<ServerResponse> notFound = ServerResponse.notFound().build();
 
-        // get customer from repository 
+        // get customer from repository
         Mono<User> customerMono = customerRepository.getUserById(customerId);
 
         // build response
         return customerMono
-            .flatMap(customer -> extracted(customer))
-            .switchIfEmpty(notFound);
+                .flatMap(this::getUserContent)
+                .switchIfEmpty(notFound);
     }
 
-    private Mono<ServerResponse> extracted(User customer) {
+    private Mono<ServerResponse> getUserContent(User customer) {
         return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(fromValue(customer));
     }
 
@@ -71,12 +72,12 @@ public class UserHandler {
         // get customer data from request object
         Mono<User> customer = request.bodyToMono(User.class);
 
-        // get customer from repository 
+        // get customer from repository
         Mono<User> responseMono = customerRepository.putUser(customerId, customer);
 
         // build response
         return responseMono
-            .flatMap(cust -> extracted(cust));
+                .flatMap(this::getUserContent);
     }
 
     /**
@@ -86,12 +87,12 @@ public class UserHandler {
         // parse id from path-variable
         long customerId = Long.valueOf(request.pathVariable("id"));
 
-        // get customer from repository 
+        // get customer from repository
         Mono<String> responseMono = customerRepository.deleteUser(customerId);
 
         // build response
         return responseMono
-            .flatMap(strMono -> ServerResponse.ok().contentType(MediaType.TEXT_PLAIN).body(fromValue(strMono)));
-    }
+                .flatMap(strMono -> ServerResponse.ok().contentType(MediaType.TEXT_PLAIN).body(fromValue(strMono)));
 
+    }
 }
